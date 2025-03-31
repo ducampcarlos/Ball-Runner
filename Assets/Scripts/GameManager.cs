@@ -36,7 +36,7 @@ public class GameManager : MonoBehaviour
 
     void ScoreUp()
     {
-        scure++;
+        score++;
         scoreText.text = score.ToString();
     }
 
@@ -45,5 +45,6 @@ public class GameManager : MonoBehaviour
         player.SetActive(true);
         playbutton.SetActive(false);
         spawnObstacles = StartCoroutine(SpawnObstacles());
+        InvokeRepeating("ScoreUp", 2f, 1f);
     }
 }
