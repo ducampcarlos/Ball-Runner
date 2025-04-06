@@ -11,56 +11,71 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float jumpForce = 10f;
     [SerializeField] bool canJump = true;
     [SerializeField] GameObject shipObject;
+    [SerializeField] AudioSource audioSource;
+    [SerializeField] float pitchUp = 2f;
+    [SerializeField] float pitchNormal = 1f;
+    [SerializeField] float pitchLerpSpeed = 2f;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+
+        audioSource = GetComponent<AudioSource>();
     }
 
     private void Update()
     {
         // Detects if the player is on Android platform
-#if UNITY_ANDROID
-        if (Touchscreen.current.primaryTouch.press.wasPressedThisFrame && canJump)
+#if UNITY_ANDROID || UNITY_EDITOR
+        if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasPressedThisFrame && canJump)
         {
             Jump();
         }
 #endif
 
         // Detects if the player is on PC platform
-#if UNITY_STANDALONE
+#if UNITY_STANDALONE || UNITY_EDITOR
         if (Mouse.current.leftButton.isPressed && canJump)
         {
             Jump();
         }
 #endif
 
-        // Gravity applied by code
-        rb.AddForce(Vector3.down * 20f, ForceMode.Force);
-
         // Rotate ship when is going up to look up, and down when is going down
         Quaternion targetRotation = Quaternion.identity;
 
-        if (rb.linearVelocity.y > 0)
+        float targetPitch = pitchNormal;
+
+        if (Mathf.Approximately(rb.linearVelocity.y, 0))
+        {
+            targetRotation = Quaternion.Euler(0, 0, 0);
+        }
+        else if (rb.linearVelocity.y > 0)
         {
             targetRotation = Quaternion.Euler(-30, 0, 0);
+            targetPitch = pitchUp;
         }
         else if (rb.linearVelocity.y < 0)
         {
             targetRotation = Quaternion.Euler(30, 0, 0);
         }
-        else
-        {
-            targetRotation = Quaternion.Euler(0, 0, 0);
-        }
 
-        // Suavizar la rotación
+
+        audioSource.pitch = Mathf.Lerp(audioSource.pitch, targetPitch, Time.deltaTime * pitchLerpSpeed);
+
+
         float rotationSpeed = 10f; // Podés ajustar esto para más o menos suavidad
         shipObject.transform.rotation = Quaternion.Lerp(
             shipObject.transform.rotation,
             targetRotation,
             Time.deltaTime * rotationSpeed
         );
+    }
+
+    private void FixedUpdate()
+    {
+        // Gravity applied by code
+        rb.AddForce(Vector3.down * 40f, ForceMode.Force);
     }
 
     private void Jump()
