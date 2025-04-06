@@ -5084,13 +5084,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 74c785e48d7f34e4ea38eb65564d75fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  obstacle: {fileID: 2841063090824677138, guid: 47da4e3cfc6e98d478e7b377d7a0dbed, type: 3}
+  obstaclePrefab: {fileID: 2841063090824677138, guid: 47da4e3cfc6e98d478e7b377d7a0dbed, type: 3}
   spawnPoint: {fileID: 822079744}
+  poolSize: 10
   minSpawnTime: 0.5
   maxSpawnTime: 2
   scoreText: {fileID: 353035330}
-  playbutton: {fileID: 940801522}
+  playButton: {fileID: 940801522}
   player: {fileID: 2032828693}
+  obstacleSpeed: -7.5
+  speedIncreaseRate: -0.2
+  increaseInterval: 1
+  maxObstacleSpeed: -50
 --- !u!4 &237466468
 Transform:
   m_ObjectHideFlags: 0
