@@ -2,9 +2,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
-//<summary>
-//This script is responsible for the player's movement, supporting both Android and PC platforms.
-//</summary>
 public class PlayerController : MonoBehaviour
 {
     Rigidbody rb;
@@ -22,36 +19,29 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-
         audioSource = GetComponent<AudioSource>();
     }
 
     private void Update()
     {
-        if(isDead)
-        {
-            return;
-        }
+        if (isDead) return;
 
-        // Detects if the player is on Android platform
-#if UNITY_ANDROID || UNITY_EDITOR
-        if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasPressedThisFrame && canJump && !isDead)
+#if UNITY_ANDROID || UNITY_WEBGL || UNITY_EDITOR
+        if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasPressedThisFrame && canJump)
         {
             Jump();
         }
 #endif
 
-        // Detects if the player is on PC platform
-#if UNITY_STANDALONE || UNITY_EDITOR
-        if (Mouse.current.leftButton.wasPressedThisFrame && canJump && !isDead)
+#if UNITY_STANDALONE || UNITY_WEBGL || UNITY_EDITOR
+        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame && canJump)
         {
             Jump();
         }
 #endif
 
-        // Rotate ship when is going up to look up, and down when is going down
+        // Visual feedback for up/down movement
         Quaternion targetRotation = Quaternion.identity;
-
         float targetPitch = pitchNormal;
 
         if (Mathf.Approximately(rb.linearVelocity.y, 0))
@@ -63,26 +53,18 @@ public class PlayerController : MonoBehaviour
             targetRotation = Quaternion.Euler(-30, 0, 0);
             targetPitch = pitchUp;
         }
-        else if (rb.linearVelocity.y < 0)
+        else
         {
             targetRotation = Quaternion.Euler(30, 0, 0);
         }
 
-
         audioSource.pitch = Mathf.Lerp(audioSource.pitch, targetPitch, Time.deltaTime * pitchLerpSpeed);
-
-
-        float rotationSpeed = 10f; // Podés ajustar esto para más o menos suavidad
-        shipObject.transform.rotation = Quaternion.Lerp(
-            shipObject.transform.rotation,
-            targetRotation,
-            Time.deltaTime * rotationSpeed
-        );
+        float rotationSpeed = 10f;
+        shipObject.transform.rotation = Quaternion.Lerp(shipObject.transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
     }
 
     private void FixedUpdate()
     {
-        // Gravity applied by code
         rb.AddForce(Vector3.down * 40f, ForceMode.Force);
     }
 
@@ -92,7 +74,6 @@ public class PlayerController : MonoBehaviour
         canJump = false;
     }
 
-    // When the player collides with the ground, the player can jump again.
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
@@ -114,12 +95,11 @@ public class PlayerController : MonoBehaviour
             audioSource.loop = false;
             audioSource.pitch = 1f;
             audioSource.clip = explosionSFX;
-            audioSource.time = 0.15f; // Empezar desde 0.15s
+            audioSource.time = 0.15f;
             audioSource.Play();
-            for (int i = 0; i < explosionParticles.Length; i++)
-            {
-                explosionParticles[i].Play();
-            }
+
+            foreach (var particle in explosionParticles)
+                particle.Play();
         }
     }
 }
