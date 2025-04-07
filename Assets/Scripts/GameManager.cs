@@ -2,9 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager instance;
+
     [Header("Obstacle Pooling")]
     [SerializeField] GameObject obstaclePrefab;
     [SerializeField] Transform spawnPoint;
@@ -32,6 +35,15 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+        if(instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+
         playButton.SetActive(true);
         player.SetActive(false);
         InitializeObstaclePool();
@@ -100,6 +112,11 @@ public class GameManager : MonoBehaviour
             obstacleSpeed += speedIncreaseRate;
             obstacleSpeed = Mathf.Max(obstacleSpeed, maxObstacleSpeed); // Clamp
         }
+    }
+
+    public void Restart()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
 }

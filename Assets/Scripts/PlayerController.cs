@@ -11,10 +11,13 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float jumpForce = 10f;
     [SerializeField] bool canJump = true;
     [SerializeField] GameObject shipObject;
-    [SerializeField] AudioSource audioSource;
+    AudioSource audioSource;
     [SerializeField] float pitchUp = 2f;
     [SerializeField] float pitchNormal = 1f;
     [SerializeField] float pitchLerpSpeed = 2f;
+    [SerializeField] ParticleSystem[] explosionParticles;
+    bool isDead = false;
+    [SerializeField] AudioClip explosionSFX;
 
     private void Awake()
     {
@@ -25,9 +28,14 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        if(isDead)
+        {
+            return;
+        }
+
         // Detects if the player is on Android platform
 #if UNITY_ANDROID || UNITY_EDITOR
-        if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasPressedThisFrame && canJump)
+        if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasPressedThisFrame && canJump && !isDead)
         {
             Jump();
         }
@@ -35,7 +43,7 @@ public class PlayerController : MonoBehaviour
 
         // Detects if the player is on PC platform
 #if UNITY_STANDALONE || UNITY_EDITOR
-        if (Mouse.current.leftButton.wasPressedThisFrame && canJump)
+        if (Mouse.current.leftButton.wasPressedThisFrame && canJump && !isDead)
         {
             Jump();
         }
@@ -97,7 +105,21 @@ public class PlayerController : MonoBehaviour
     {
         if (other.CompareTag("Obstacle"))
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            GameManager.instance.Invoke("Restart", 1.5f);
+            shipObject.SetActive(false);
+            isDead = true;
+            rb.isKinematic = true;
+            GetComponent<Collider>().enabled = false;
+            audioSource.Stop();
+            audioSource.loop = false;
+            audioSource.pitch = 1f;
+            audioSource.clip = explosionSFX;
+            audioSource.time = 0.15f; // Empezar desde 0.15s
+            audioSource.Play();
+            for (int i = 0; i < explosionParticles.Length; i++)
+            {
+                explosionParticles[i].Play();
+            }
         }
     }
 }
