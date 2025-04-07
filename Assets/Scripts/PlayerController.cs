@@ -35,7 +35,7 @@ public class PlayerController : MonoBehaviour
 
         // Detects if the player is on PC platform
 #if UNITY_STANDALONE || UNITY_EDITOR
-        if (Mouse.current.leftButton.isPressed && canJump)
+        if (Mouse.current.leftButton.wasPressedThisFrame && canJump)
         {
             Jump();
         }
