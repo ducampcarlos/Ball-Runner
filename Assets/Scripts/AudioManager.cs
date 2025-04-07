@@ -5,11 +5,11 @@ public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance { get; private set; }
 
-    private AudioMixer audioMixer;
+    [Header("Mixer")]
+    [SerializeField] private AudioMixer audioMixer; // Asignalo desde el Inspector
 
     private const string SFX_PARAM = "SFX";
     private const string MUSIC_PARAM = "Music";
-    private const string MIXER_PATH = "Audio/MainMixer"; // Ruta dentro de Resources
 
     private bool isSFXMuted = false;
     private bool isMusicMuted = false;
@@ -25,16 +25,13 @@ public class AudioManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        // Cargar automáticamente el AudioMixer
-        audioMixer = Resources.Load<AudioMixer>(MIXER_PATH);
-
         if (audioMixer == null)
         {
-            Debug.LogError("AudioMixer no encontrado en Resources. Asegúrate de que esté en: Resources/Audio/MainMixer");
+            Debug.LogError("AudioMixer no está asignado en el Inspector.");
             return;
         }
 
-        // Restaurar estado
+        // Restaurar estado guardado
         isSFXMuted = PlayerPrefs.GetInt("SFXMuted", 0) == 1;
         isMusicMuted = PlayerPrefs.GetInt("MusicMuted", 0) == 1;
 
